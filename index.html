@@ -1,31 +1,83 @@
 <html>
 <head>
 	<title>John Holland</title>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.css" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Dosis:400,800|Open+Sans:400,800,800italic' rel='stylesheet' type='text/css'>
+	<style type="text/css">
+	  ul {
+	    list-style-type: none;
+	  }
+	  
+	  body {
+	    background: url("house_in_the_dark.jpg") no-repeat;
+	    background-size: cover;
+	  }
+	  
+  h1 {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 400;
+    line-height: 46px;
+    font-size: 40px;
+    }
+  h4 {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 24px;
+    }
+
+  h1, h4, p, li, ul {
+    color: #eee;
+  }
+  p, li, ul {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    line-height: 23px;
+  }
+  
+  a {
+    color: #3f33;
+  }
+    
+	</style>
 </head>
 <body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.1/mithril.js"></script>
-<script>
+  <div class="container">
 
-function prop() {
-	var p = [];
+      <div class="row">
+        <h1>John Holland</h1>
+      </div>
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <h4><a href="https://paper.fiftythree.com/2307015-John-Holland">Paper Drawings & Doodles</a></h4>
+          <ul></ul>
+          <h4>PICO8 Doodles</h4>
+          <ul>
+              <li><a href="algorithms.html">Algorithms</a></li>
+              <li><a href="verlet.html">Verlet</a></li>
+              <li><a href="long_draw.html">Long Draw</a></li>
+          </ul>
 
-	var args = Array.prototype.slice.apply(arguments);
+          <h4><a href="http://panzorfork.itch.io/">panzorfork.itch.io/</a></h4>
+          <ul style="list-style-type: none">
+              <li><a href="http://panzorfork.itch.io/rewind">Rewind</a></li>
+              <li><a href="http://panzorfork.itch.io/calm-simulator">Calm Simulator</a></li>
+          </ul>
 
-	return function(newVal) {
-		if (arguments.length === 0) {
-			return value;
-		} else if () {
-			value = newVal;
-		}
-	}
-}
+          <h4><a href="https://github.com/john-holland">Some Github Projects</a></h4>
+          <ul>
+              <li><a href="http://mothersday.github.io/">And a mothers day card</a></li>
+          </ul>
+        </div>
+      </div>
 
+      <footer class="footer">
+        <p>&copy; 2016 John Holland</p>
+      </footer>
 
-</script>
+    </div> <!-- /container -->
+
 
 </body>
 </html>
