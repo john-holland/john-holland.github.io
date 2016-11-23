@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" ng-app>
+  <head>
+    <title>Raffle Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/css/bootstrap.css">
+    <style>
+      body {
+        padding-top: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" ng-controller="ChatController">
+      <div class="navbar navbar-fixed-top navbar-inverse">
+        <div class="navbar-inner">
+          <div class="pull-right">
+            <a href="/" class="brand">John Holland</a>
+          </div>
+        </div>
+      </div>
+      <div class="page-header">
+        <h1>Raffle tool</h1>
+      </div>
+      <div class="row">
+        Name and amount of tickets, comma separated ex: Bob Billingham 500, Joe 1000<br/>
+        <textarea type="text" class="names"></textarea>
+        <button>Calculate winner</button>
+        <br/>
+        Winner: <p class="winner"></p>
+      </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.5/js/bootstrap.js"></script>
+    <script>
+      function findWinner() {
+        
+        var tickets = shuffle($('.names').val().split(',').map((s) => {
+          return {
+            name: s.trim().split(' ').filter(isNaN).join(' '),
+            count: Number(s.trim().split(' ').find(s => !isNaN(s)))
+          };
+        }));
+        
+        console.log(tickets);
+        
+        return shuffle(_.flatMap(tickets, (t) => {
+          var tickets = [];
+          
+          for (var i = 0; i < t.count; i++) {
+            tickets.push(t.name);
+          }
+          
+          return tickets;
+        }))[0];
+      }
+      
+      $('button').click(() => $('.winner').text(findWinner()));
+      
+      function shuffle(array) {
+        var m = array.length, t, i;
+      
+        // While there remain elements to shuffle…
+        while (m) {
+      
+          // Pick a remaining element…
+          i = Math.floor(Math.random() * m--);
+      
+          // And swap it with the current element.
+          t = array[m];
+          array[m] = array[i];
+          array[i] = t;
+        }
+      
+        return array;
+      }
+    </script>
+  </body>
+</html>
