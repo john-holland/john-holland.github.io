@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Verlet Shapes</title>
+	<meta charset="UTF-8" />
+	<link rel="stylesheet" href="./style.css" type="text/css" media="screen, projection" />
+	<link href='http://fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+	<script type="text/javascript" src="./verlet-1.0.0.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+	<style type="text/css" media="screen">
+		#editor { 
+			position: relative;
+			width: 100%;
+			height: 20rem;
+		}
+	</style>
+</head>
+<body>
+	<script type="text/javascript" src="./common.js"></script>
+	<div id="header">
+		<h1><a href="../">verlet-js</a> / <em>pendulum generator</em></h1>
+		<div id="bsa">
+			<!-- <script type="text/javascript" src="http://cdn.adpacks.com/adpacks.js?legacyid=1285933&zoneid=1386&key=3df5e2ea1c6a237386fb9d4cdf5b99f0&serve=C6SD52Y&placement=subprotocolcom&circle=dev" id="_adpacks_js"></script> -->
+		</div>
+	</div>
+
+
+	<div id="editor">
+		
+		// simulation
+		var sim = new VerletJS(width, height, canvas);
+		sim.friction = 1;
+		
+		function * pendulumGenerator({ pendulumCount = 5, period = 1, totalCycles = 3, gravity = 9.8, lengthMultiplier = 1 } = {}) {
+			for (let i = 0; i < pendulumCount; i++) {
+				yield gravity * Math.abs(period/(2*Math.PI*(totalCycles+(i+1)+1))) * lengthMultiplier;
+			}
+		}
+
+		const distanceBetween = 0;
+
+		const left = 0;
+		[...pendulumGenerator({ totalCycles: 1, period: 5, pendulumCount: 50, lengthMultiplier: 1})].forEach((c, i) => {
+			const x = width / 2 + i * distanceBetween;
+			const y = 10;
+			const segment = sim.lineSegments([new Vec2(x, y), new Vec2(x+c*150, y)], 1);
+			const pin = segment.pin(0);
+
+			return segment;
+		});
+
+		// animation loop
+		var loop = function() {
+			sim.frame(16);
+			sim.draw();
+			requestAnimFrame(loop);
+		};
+
+		loop();</div>
+
+	<input type="button" value="run" class="run-button"></input>
+			
+	<canvas id="scratch" style="width: 800px; height: 500px;"></canvas>
+
+	<h4>Vertlet-js Author</h4>
+	<a href="http://subprotocol.com/">Sub Protocol</a>
+
+	<div id="footer">
+		Copyright 2013 Sub Protocol and other contributors.
+		<br/><a href="http://subprotocol.com/">http://subprotocol.com/</a>
+	</div>
+
+	<script>
+		var editor = ace.edit("editor");
+		editor.setTheme("ace/theme/monokai");
+		editor.session.setMode("ace/mode/javascript");
+	</script>
+
+<script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v2.min.js"></script>
+<script src="https://d3js.org/d3-timer.v2.min.js"></script>
+<script src="https://d3js.org/d3-force.v2.min.js"></script>
+
+	<script type="text/javascript">
+		window.onload = function() {		
+			var editor = ace.edit("editor");
+			const run = () => {
+				var canvas = document.getElementById("scratch");
+
+				// canvas dimensions
+				var width = parseInt(canvas.style.width);
+				var height = parseInt(canvas.style.height);
+
+				// retina
+				var dpr = window.devicePixelRatio || 1;
+				canvas.width = width*dpr;
+				canvas.height = height*dpr;
+				canvas.getContext("2d").scale(dpr, dpr);
+
+				eval(editor.getValue());
+			}
+			document.querySelector('.run-button').addEventListener('click', () => {
+				run();
+			});
+			run();
+		}
+	</script>
+</body>
+</html>
