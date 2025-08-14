@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game Language - XState Visualizer</title>
+    <script src="https://unpkg.com/xstate@4/dist/xstate.js"></script>
+    <script src="https://unpkg.com/@xstate/viz@1.0.0/dist/xstate-viz.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .state-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .coin-display {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .coin {
+            background: #f39c12;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        #visualizer {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Board Game Language - XState Visualizer</h1>
+        
+        <div class="state-info">
+            <h3>Current State: <span id="current-state">setup</span></h3>
+            <div class="coin-display" id="coin-display">
+                <div class="coin">castle_token: 0</div>
+                <div class="coin">en_passant_token: 0</div>
+                <div class="coin">queen_token: 0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="sendEvent('PLACE_PIECES')">Place Pieces</button>
+            <button onclick="sendEvent('SELECT_PIECE')">Select Piece</button>
+            <button onclick="sendEvent('MOVE_PIECE')">Move Piece</button>
+            <button onclick="sendEvent('VALIDATE_MOVE')">Validate Move</button>
+            <button onclick="sendEvent('EXECUTE_MOVE')">Execute Move</button>
+            <button onclick="sendEvent('CHECK_WIN')">Check Win</button>
+            <button onclick="sendEvent('NEXT_TURN')">Next Turn</button>
+            
+            <hr style="width: 100%; margin: 20px 0;">
+            
+            <button onclick="sendEvent('TRIGGER_PIECE_MOVED')">Trigger: Pawn Moved 2</button>
+            <button onclick="sendEvent('TRIGGER_KING_FIRST_MOVE')">Trigger: King First Move</button>
+            <button onclick="sendEvent('TRIGGER_QUEEN_FIRST_MOVE')">Trigger: Queen First Move</button>
+            
+            <button onclick="sendEvent('ACTION_EN_PASSANT')">Action: En Passant</button>
+            <button onclick="sendEvent('ACTION_ADVANCED_CASTLING')">Action: Advanced Castling</button>
+            
+            <button onclick="sendEvent('CONSTRAINT_CASTLING_CONSTRAINT')">Constraint: Castling</button>
+            <button onclick="sendEvent('CONSTRAINT_QUEEN_SIDE_CASTLING_CONSTRAINT')">Constraint: Queen-side Castling</button>
+        </div>
+
+        <div id="visualizer"></div>
+    </div>
+
+    <script>
+        // Simplified state machine for visualization
+        const chessStateMachine = {
+            id: 'chess',
+            initial: 'setup',
+            context: {
+                playerCoins: new Map([
+                    ['castle_token', 0],
+                    ['en_passant_token', 0],
+                    ['queen_token', 0]
+                ])
+            },
+            states: {
+                setup: {
+                    on: {
+                        'PLACE_PIECES': 'main'
+                    }
+                },
+                main: {
+                    on: {
+                        'SELECT_PIECE': 'selecting',
+                        'MOVE_PIECE': 'moving',
+                        'VALIDATE_MOVE': 'validating',
+                        'EXECUTE_MOVE': 'executing',
+                        'CHECK_WIN': 'checking_win',
+                        'NEXT_TURN': 'main',
+                        'TRIGGER_PIECE_MOVED': {
+                            target: 'main',
+                            actions: 'giveEnPassantToken'
+                        },
+                        'TRIGGER_KING_FIRST_MOVE': {
+                            target: 'main',
+                            actions: 'giveCastleToken'
+                        },
+                        'TRIGGER_QUEEN_FIRST_MOVE': {
+                            target: 'main',
+                            actions: 'giveCastleAndQueenTokens'
+                        },
+                        'ACTION_EN_PASSANT': {
+                            target: 'main',
+                            actions: 'consumeEnPassantToken'
+                        },
+                        'ACTION_ADVANCED_CASTLING': {
+                            target: 'main',
+                            actions: 'consumeCastleAndQueenTokens'
+                        },
+                        'CONSTRAINT_CASTLING_CONSTRAINT': {
+                            target: 'main',
+                            actions: 'checkCastlingConstraint'
+                        },
+                        'CONSTRAINT_QUEEN_SIDE_CASTLING_CONSTRAINT': {
+                            target: 'main',
+                            actions: 'checkQueenSideCastlingConstraint'
+                        }
+                    }
+                },
+                selecting: {
+                    on: {
+                        'PIECE_SELECTED': 'moving',
+                        'CANCEL_SELECTION': 'main'
+                    }
+                },
+                moving: {
+                    on: {
+                        'MOVE_VALID': 'validating',
+                        'MOVE_INVALID': 'main'
+                    }
+                },
+                validating: {
+                    on: {
+                        'CONSTRAINTS_PASS': 'executing',
+                        'CONSTRAINTS_FAIL': 'main',
+                        'COIN_BYPASS': 'executing'
+                    }
+                },
+                executing: {
+                    on: {
+                        'MOVE_EXECUTED': 'checking_win',
+                        'TRIGGER_FIRED': 'checking_win',
+                        'ACTION_COST_PAID': 'checking_win'
+                    }
+                },
+                checking_win: {
+                    on: {
+                        'WIN_CONDITION_MET': 'end',
+                        'NO_WIN': 'main'
+                    }
+                },
+                end: {
+                    type: 'final'
+                }
+            }
+        };
+
+        // Create the state machine
+        const machine = XState.createMachine(chessStateMachine, {
+            actions: {
+                giveEnPassantToken: (context) => {
+                    context.playerCoins.set('en_passant_token', 
+                        context.playerCoins.get('en_passant_token') + 1);
+                    updateCoinDisplay();
+                },
+                giveCastleToken: (context) => {
+                    context.playerCoins.set('castle_token', 
+                        context.playerCoins.get('castle_token') + 1);
+                    updateCoinDisplay();
+                },
+                giveCastleAndQueenTokens: (context) => {
+                    context.playerCoins.set('castle_token', 
+                        context.playerCoins.get('castle_token') + 1);
+                    context.playerCoins.set('queen_token', 
+                        context.playerCoins.get('queen_token') + 1);
+                    updateCoinDisplay();
+                },
+                consumeEnPassantToken: (context) => {
+                    const current = context.playerCoins.get('en_passant_token');
+                    if (current > 0) {
+                        context.playerCoins.set('en_passant_token', current - 1);
+                        updateCoinDisplay();
+                    }
+                },
+                consumeCastleAndQueenTokens: (context) => {
+                    const castleTokens = context.playerCoins.get('castle_token');
+                    const queenTokens = context.playerCoins.get('queen_token');
+                    if (castleTokens > 0 && queenTokens > 0) {
+                        context.playerCoins.set('castle_token', castleTokens - 1);
+                        context.playerCoins.set('queen_token', queenTokens - 1);
+                        updateCoinDisplay();
+                    }
+                },
+                checkCastlingConstraint: (context) => {
+                    const castleTokens = context.playerCoins.get('castle_token');
+                    if (castleTokens > 0) {
+                        context.playerCoins.set('castle_token', castleTokens - 1);
+                        updateCoinDisplay();
+                    }
+                },
+                checkQueenSideCastlingConstraint: (context) => {
+                    const castleTokens = context.playerCoins.get('castle_token');
+                    const queenTokens = context.playerCoins.get('queen_token');
+                    if (castleTokens > 0 && queenTokens > 0) {
+                        context.playerCoins.set('castle_token', castleTokens - 1);
+                        context.playerCoins.set('queen_token', queenTokens - 1);
+                        updateCoinDisplay();
+                    }
+                }
+            }
+        });
+
+        // Create the service
+        const service = XState.interpret(machine)
+            .onTransition((state) => {
+                document.getElementById('current-state').textContent = state.value;
+                updateCoinDisplay();
+            })
+            .start();
+
+        // Function to send events
+        function sendEvent(event) {
+            service.send(event);
+        }
+
+        // Function to update coin display
+        function updateCoinDisplay() {
+            const coinDisplay = document.getElementById('coin-display');
+            const coins = service.state.context.playerCoins;
+            
+            coinDisplay.innerHTML = '';
+            coins.forEach((count, coinType) => {
+                const coinElement = document.createElement('div');
+                coinElement.className = 'coin';
+                coinElement.textContent = `${coinType}: ${count}`;
+                coinDisplay.appendChild(coinElement);
+            });
+        }
+
+        // Initialize coin display
+        updateCoinDisplay();
+
+        // Visualize the state machine
+        const viz = new XStateViz({
+            machine: machine,
+            element: document.getElementById('visualizer')
+        });
+    </script>
+</body>
+</html> 
